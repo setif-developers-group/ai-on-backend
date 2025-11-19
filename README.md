@@ -122,7 +122,46 @@ The onboarding process is an interactive chat with an AI agent.
 ### Other Modules
 
 -   **AI Core:** `/api/ai_core/`
--   **Budget:** `/api/budget/`
+### Budget
+
+The Budget module uses an **Event-Driven AI Agent** to manage and generate budgets.
+
+-   **Generate Budgets (AI):** `POST /api/budget/generate/`
+    -   Triggers the AI to generate a personalized budget based on the user's profile and financial history.
+    -   **Request Body:** None (Empty JSON `{}`).
+    -   **Response:**
+        ```json
+        {
+          "message": "Here is your proposed budget...",
+          "budgets": [
+            {
+              "title": "Groceries",
+              "budget": 20000.00,
+              "spent": 0.00,
+              "description": "## Groceries\n* Milk\n* Bread..."
+            }
+          ]
+        }
+        ```
+
+-   **List Budgets:** `GET /api/budget/`
+    -   Returns a list of all budget categories for the user.
+
+-   **Get Budget Details:** `GET /api/budget/{id}/`
+    -   Returns full details of a specific budget, including the Markdown description.
+
+-   **Update Budget:** `PATCH /api/budget/{id}/`
+    -   Update `budget` (allocated amount) or `spent` amount.
+    -   **Event-Driven Behavior:**
+        -   **Changing `budget`**: Triggers the AI to **rebalance** other categories to maintain logical consistency.
+        -   **Overspending (`spent` > `budget`)**: Triggers the AI to update the description with a warning and advice.
+    -   **Request Body:** `{"budget": 25000}` or `{"spent": 5000}`.
+    -   *Note: `title` and `description` are read-only and managed by the AI.*
+
+-   **Delete Budget:** `DELETE /api/budget/{id}/`
+    -   Deletes a category.
+    -   **Event-Driven Behavior:** Triggers the AI to **rebalance** the remaining funds into other categories or savings.
+
 -   **Advisor:** `/api/advisor/`
 -   **Forecast:** `/api/forecast/`
 -   **Chat:** `/api/chat/`

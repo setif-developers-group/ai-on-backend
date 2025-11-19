@@ -28,13 +28,13 @@ class ConversationHistory(models.Model):
         ('onboarding_agent', 'onboarding_agent'),
         ('chatbot_agent', 'chatbot_agent'),
         ('main_ai_coordinator', 'main_ai_coordinator'),
-        ('budget_sentinel', 'budget_sentinel'),
         ('market_watcher', 'market_watcher'),
         ('planner_forecaster', 'planner_forecaster'),
         ('receipt_parser', 'receipt_parser'),
         ('product_advisor', 'product_advisor'),
         ('notification_agent', 'notification_agent'),
         ('expense_manager', 'expense_manager'),
+        ('budget_agent', 'budget_agent'),
     ]
 
     agent = models.ForeignKey(
