@@ -304,12 +304,67 @@ The Advisor module provides smart product recommendations and purchase guidance 
         -   "Recommend a phone under 30000"
         -   "Compare these two products"
 
+### Notify
+
+The Notify module is a centralized notification system that all agents use to create and manage user notifications.
+
+-   **List Notifications:** `GET /api/notify/`
+    -   Get all notifications with optional filtering by read status.
+    -   **Query Parameters:**
+        -   `?read=true` - Show only read notifications
+        -   `?read=false` - Show only unread notifications
+        -   No parameter - Show all notifications
+    -   **Response:**
+        ```json
+        [
+          {
+            "id": 1,
+            "notification_type": "budget_alert",
+            "priority": "high",
+            "title": "⚠️ Overspending in Groceries",
+            "message": "You have exceeded your budget...",
+            "is_read": false,
+            "created_at": "2025-11-22T03:00:00Z",
+            "related_budget_id": 5
+          }
+        ]
+        ```
+
+-   **Get Notification Details:** `GET /api/notify/{id}/`
+    -   Get a specific notification. **Automatically marks it as read**.
+
+-   **Mark as Read:** `PATCH /api/notify/{id}/read/`
+    -   Manually mark a specific notification as read.
+
+-   **Mark All as Read:** `POST /api/notify/mark-all-read/`
+    -   Mark all unread notifications as read.
+    -   **Response:** `{"marked_count": 5}`
+
+-   **Unread Count:** `GET /api/notify/unread-count/`
+    -   Get the count of unread notifications (useful for badge display).
+    -   **Response:** `{"unread_count": 3}`
+
+-   **Delete Notification:** `DELETE /api/notify/{id}/delete/`
+    -   Delete a specific notification.
+
+-   **Notification Types:**
+    -   `budget_alert` - Budget-related alerts (overspending)
+    -   `expense_alert` - Expense warnings (approaching limit)
+    -   `advisor_tip` - Tips from the advisor
+    -   `goal_milestone` - Goal achievements
+    -   `system` - System notifications
+
+-   **Priority Levels:** `low`, `medium`, `high`, `urgent`
+
+-   **Automatic Notifications:**
+    -   Overspending alerts (high priority) when budget is exceeded
+    -   Budget warnings (medium priority) when 80% of budget is used
+
 ### Other Modules
 
 Additional modules are available but not yet fully documented:
 
 -   **AI Core:** `/api/ai_core/` - Main AI Coordinator (agent-to-agent only, no direct user access)
 -   **Forecast:** `/api/forecast/` - Financial forecasting agent
--   **Notify:** `/api/notify/` - Notification management
 
 Check the Swagger docs (`/api/docs/`) for details on these endpoints.

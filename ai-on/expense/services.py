@@ -180,9 +180,36 @@ def process_expense_management(user: User, message: str, file_path: str = None, 
                 budget.spent += amount
                 budget.save()
                 
+                # Create notifications for budget alerts
+                from notify.services import create_notification
+                
                 # Check for overspending
                 if budget.spent > budget.budget:
                     alerts.append(f"Overspending detected in {budget.title}. Budget: {budget.budget}, Spent: {budget.spent}")
+                    
+                    # Create high-priority notification for overspending
+                    create_notification(
+                        user=user,
+                        notification_type='budget_alert',
+                        priority='high',
+                        title=f'⚠️ Overspending in {budget.title}',
+                        message=f'You have exceeded your budget for {budget.title}. Budget: {budget.budget} DZD, Spent: {budget.spent} DZD',
+                        related_budget_id=budget.id,
+                        action_url=f'/budget/{budget.id}'
+                    )
+                
+                # Check for budget warnings (80% threshold)
+                elif budget.spent >= budget.budget * 0.8 and budget.spent <= budget.budget:
+                    percentage = (budget.spent / budget.budget) * 100
+                    create_notification(
+                        user=user,
+                        notification_type='expense_alert',
+                        priority='medium',
+                        title=f'📊 Approaching budget limit: {budget.title}',
+                        message=f'You have used {percentage:.0f}% of your {budget.title} budget. Remaining: {budget.budget - budget.spent} DZD',
+                        related_budget_id=budget.id,
+                        action_url=f'/budget/{budget.id}'
+                    )
             
             processed_expenses.append({
                 "id": expense.id,
@@ -190,12 +217,6 @@ def process_expense_management(user: User, message: str, file_path: str = None, 
                 "amount": float(amount),
                 "category": budget.title if budget else "Uncategorized"
             })
-            
-        # If alerts, notify Main AI
-        if alerts:
-            from ai_core.tools import call_main_coordinator
-            alert_msg = f"ALERT: User {user.username} has overspent. Details: {'; '.join(alerts)}. Please inform the Budget Agent."
-            call_main_coordinator(user, alert_msg)
             
         return {
             "type": "response",
